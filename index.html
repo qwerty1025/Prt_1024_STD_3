@@ -121,7 +121,7 @@
             <input type="text" id="manualName" placeholder="例如: 王大明 或 選擇常用姓名" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-amber-500">
           </div>
           <div>
-            <label class="block text-xs text-slate-300 font-semibold mb-1">配送/取貨日期 (所有單據置頂40px)</label>
+            <label class="block text-xs text-slate-300 font-semibold mb-1">配送/取貨日期 (所有單據首行置頂)</label>
             <input type="date" id="manualDate" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-amber-500">
           </div>
         </div>
@@ -234,17 +234,29 @@
       <!-- D. [臨時出貨單] 手寫空白表格預覽 -->
       <div class="bg-slate-800 rounded-2xl p-4 shadow-lg border border-slate-700 space-y-3">
         <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-          <h2 class="text-sm font-semibold text-sky-400">📝 [臨時出貨單] 現場手寫表格 (首行日期40px)</h2>
+          <h2 class="text-sm font-semibold text-sky-400">📝 [臨時出貨單] 現場手寫表格</h2>
           <button onclick="testPrintCurrentCanvas('previewCanvasTempReceipt', '測試臨時出貨單')" class="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold shadow">🖨️ 試印此預覽</button>
         </div>
-        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-700">
-           <div class="flex justify-between items-center mb-1">
-             <span class="text-slate-300 text-xs">預設手寫空格高度</span>
-             <span id="lblTempRowH" class="text-sky-400 text-xs font-bold">70 px</span>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-700">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-slate-300 text-xs">預設手寫空格高度</span>
+                <span id="lblTempRowH" class="text-sky-400 text-xs font-bold">70 px</span>
+              </div>
+              <input type="range" id="tempRowH" min="40" max="100" value="70" oninput="document.getElementById('lblTempRowH').innerText=this.value+' px'; renderAllPreviews();" class="w-full accent-sky-500">
            </div>
-           <input type="range" id="tempRowH" min="40" max="100" value="70" oninput="document.getElementById('lblTempRowH').innerText=this.value+' px'; renderAllPreviews();" class="w-full accent-sky-500">
+           
+           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-700">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-slate-300 text-xs">日期字體大小</span>
+                <span id="lblTempDatePx" class="text-amber-400 text-xs font-bold">25 px</span>
+              </div>
+              <input type="range" id="tempDatePx" min="16" max="60" value="25" oninput="document.getElementById('lblTempDatePx').innerText=this.value+' px'; renderAllPreviews();" class="w-full accent-amber-500">
+           </div>
         </div>
-        <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-700 flex flex-col items-center overflow-x-auto">
+
+        <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-700 flex flex-col items-center overflow-x-auto mt-2">
           <canvas id="previewCanvasTempReceipt" width="384" height="480"></canvas>
         </div>
       </div>
@@ -258,9 +270,9 @@
           🖨️ 機台連線與高速傳輸設定
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1">
-          <button onclick="connectPrinter('Quick')" class="py-3.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white shadow-md active:scale-95">🔹 快速配對</button>
-          <button onclick="connectPrinter('All')" class="py-3.5 bg-sky-600 hover:bg-sky-500 rounded-xl text-xs font-bold text-white shadow-md active:scale-95">🔍 搜尋全部</button>
-          <button onclick="connectUSB()" class="py-3.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white shadow-md active:scale-95">🔌 電腦 USB</button>
+          <button onclick="connectPrinter('Quick')" class="py-3.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white shadow-md active:scale-95">🔹 快速配對 (XP / Printer)</button>
+          <button onclick="connectPrinter('All')" class="py-3.5 bg-sky-600 hover:bg-sky-500 rounded-xl text-xs font-bold text-white shadow-md active:scale-95">🔍 搜尋全部藍牙裝置</button>
+          <button onclick="connectUSB()" class="py-3.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white shadow-md active:scale-95">🔌 電腦 USB 直連</button>
         </div>
         <button onclick="disconnectPrinter()" class="w-full py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-xl text-xs text-rose-300">中斷目前連線</button>
       </div>
@@ -358,7 +370,6 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig_xptre, "App_xptre");
     const db_xptre = firebase.app("App_xptre").database();
 
-    // 🔴 這裡請填入您部署 Google Apps Script 後取得的 Web App URL
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx8fOuO1m1SmXxiUeSr1vNTL_N6K64hTHbiXxWqBsPK5d1mK1Rjr7U7gFLBT_zBtIJM/exec"; 
 
     function syncToGoogleSheet(order, sheetNameStr = "hsty_hd") {
@@ -639,7 +650,8 @@
         rPxTotal: getValue('rPxTotal', 50),
         rPxItem: getValue('rPxItem', 24),
         rSpecX: getValue('rSpecX', 155),
-        tempRowH: getValue('tempRowH', 70) // 預設70px
+        tempRowH: getValue('tempRowH', 70), // 預設70px
+        tempDatePx: getValue('tempDatePx', 25) // 臨時出貨單的動態日期大小
       };
     }
 
@@ -772,14 +784,14 @@
       return binarizeCanvas1Bit(targetCanvas, st.threshold);
     }
 
-    // 臨時出貨單表格 (動態生成)
+    // 臨時出貨單表格 (動態生成) - 日期動態大小支援
     function renderTemporaryReceiptToCanvas(targetCanvas, locName, fullDateStr, rowHeight = 70) {
       const st = getGlobalPrintStyle();
       const width = 384;
       const headerHeight = 40;
       const items = PRODUCT_CATALOG.map(p => p.printName);
       
-      const calcHeight = 20 + 40 + 20 + 36 + 20 + headerHeight + (items.length * rowHeight) + 120;
+      const calcHeight = 20 + st.tempDatePx + 20 + 36 + 20 + headerHeight + (items.length * rowHeight) + 120;
       targetCanvas.width = width; targetCanvas.height = calcHeight;
       const ctx = targetCanvas.getContext('2d');
       ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, width, calcHeight);
@@ -787,12 +799,12 @@
       
       let y = 20;
 
-      // 1. 日期置頂 40px (最高權限)
+      // 1. 日期置頂 (動態文字大小，預設為 25px)
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.font = `bold 25px ${st.fontFamily}`;
+      ctx.font = `bold ${st.tempDatePx}px ${st.fontFamily}`;
       ctx.fillText(fullDateStr, width / 2, y);
-      y += 40 + 20;
+      y += st.tempDatePx + 20;
       
       ctx.textAlign = 'left';
       ctx.font = `bold 20px ${st.fontFamily}`;
@@ -872,10 +884,14 @@
     }
 
     // ========================================================
-    // 4. 傳輸引擎與事件 (縮減篇幅保留完整功能)
+    // 4. 傳輸引擎與事件 (完整還原藍牙/USB通訊)
     // ========================================================
-    let connMode = null; let bluetoothDevice = null; let printerCharacteristic = null;
-    let usbDevice = null; let usbEndpointOut = 1; let bleChunkSize = 120; 
+    let connMode = null; 
+    let bluetoothDevice = null; 
+    let printerCharacteristic = null;
+    let usbDevice = null; 
+    let usbEndpointOut = 1; 
+    let bleChunkSize = 120; 
 
     function log(msg, type = 'info') {
       const consoleEl = document.getElementById('logConsole');
@@ -884,19 +900,91 @@
       consoleEl.innerHTML = `<div class="${color}">[${time}] ${msg}</div>` + consoleEl.innerHTML;
     }
 
-    async function connectPrinter(mode) { /* 略過藍牙連線過程程式碼(同前) */ }
-    async function connectUSB() { /* 同前 */ }
-    function disconnectPrinter() { if (bluetoothDevice) bluetoothDevice.gatt.disconnect(); connMode = null; }
+    async function connectPrinter(mode) {
+      if (!navigator.bluetooth) return alert('請使用支援 Web Bluetooth 的瀏覽器 (如 Chrome/Edge/Bluefy) 開啟！');
+      try {
+        const servicesList = [
+          '000018f0-0000-1000-8000-00805f9b34fb',
+          'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+          '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+          '0000ff00-0000-1000-8000-00805f9b34fb',
+          '0000ffe0-0000-1000-8000-00805f9b34fb'
+        ];
+        let opt = { optionalServices: servicesList };
+        if (mode === 'Quick') opt.filters = [{ namePrefix: 'Printer' }, { namePrefix: 'XP' }];
+        else opt.acceptAllDevices = true;
+
+        log('正在搜尋藍牙印表機...');
+        bluetoothDevice = await navigator.bluetooth.requestDevice(opt);
+        bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+          connMode = null;
+          printerCharacteristic = null;
+          document.getElementById('connStatus').innerHTML = '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">已斷線</span>';
+          log('⚠️ 藍牙印表機已斷線', 'error');
+        });
+
+        const server = await bluetoothDevice.gatt.connect();
+        const services = await server.getPrimaryServices();
+        for (const s of services) {
+          const chars = await s.getCharacteristics();
+          for (const c of chars) {
+            if (c.properties.write || c.properties.writeWithoutResponse) {
+              printerCharacteristic = c;
+              if (c.properties.write) break; // 優先鎖定有 ACK 確認的通道
+            }
+          }
+          if (printerCharacteristic && printerCharacteristic.properties.write) break;
+        }
+
+        if (!printerCharacteristic) throw new Error('找不到可寫入的藍牙特徵值通道');
+        
+        connMode = 'ble';
+        document.getElementById('connStatus').innerHTML = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🔹 藍牙已連線 (${bluetoothDevice.name || 'XP-Q90EC'})</span>`;
+        log(`✅ 藍牙連線成功！(${bluetoothDevice.name || 'XP-Q90EC'})`, 'success');
+      } catch (e) {
+        log(`藍牙連線失敗: ${e.message}`, 'error');
+      }
+    }
+
+    async function connectUSB() {
+      if (!navigator.usb) return alert('此瀏覽器不支援 WebUSB 功能！');
+      try {
+        const device = await navigator.usb.requestDevice({ filters: [] });
+        await device.open();
+        if (!device.configuration) await device.selectConfiguration(1);
+        const iface = device.configuration.interfaces[0];
+        await device.claimInterface(iface.interfaceNumber);
+        const ep = iface.alternate.endpoints.find(e => e.direction === 'out');
+        if (!ep) throw new Error('找不到 USB 輸出端點');
+
+        usbDevice = device;
+        usbEndpointOut = ep.endpointNumber;
+        connMode = 'usb';
+        document.getElementById('connStatus').innerHTML = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🔌 USB 已連線</span>`;
+        log('✅ USB 直連成功！', 'success');
+      } catch (e) {
+        log(`USB 連線失敗: ${e.message}`, 'error');
+      }
+    }
+
+    function disconnectPrinter() { 
+      if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+         bluetoothDevice.gatt.disconnect(); 
+      }
+      connMode = null; 
+    }
     
     function compileCanvasToSingleGSv0Packet(canvas) {
       const width = canvas.width, height = canvas.height, bytesPerRow = width / 8; 
       const imgData = canvas.getContext('2d').getImageData(0, 0, width, height).data;
       const rasterLength = bytesPerRow * height;
       const packet = new Uint8Array(2 + 8 + rasterLength + 8); let offset = 0;
-      packet[offset++] = 0x1B; packet[offset++] = 0x40;
+      
+      packet[offset++] = 0x1B; packet[offset++] = 0x40; // ESC @
       packet[offset++] = 0x1D; packet[offset++] = 0x76; packet[offset++] = 0x30; packet[offset++] = 0x00;
       packet[offset++] = bytesPerRow & 0xFF; packet[offset++] = (bytesPerRow >> 8) & 0xFF; 
       packet[offset++] = height & 0xFF; packet[offset++] = (height >> 8) & 0xFF;      
+      
       for (let y = 0; y < height; y++) {
         for (let bx = 0; bx < bytesPerRow; bx++) {
           let byte = 0;
@@ -906,22 +994,68 @@
           packet[offset++] = byte;
         }
       }
+      
+      // 走紙與自動切刀
       packet[offset++] = 0x0A; packet[offset++] = 0x0A; packet[offset++] = 0x0A; packet[offset++] = 0x0A;
       packet[offset++] = 0x1D; packet[offset++] = 0x56; packet[offset++] = 0x42; packet[offset++] = 0x00;
+      
       return packet;
     }
 
     async function sendPacketFast(packetBuffer) {
-      if (!connMode) return alert('請先連線機台！');
-      // 實做同前，使用 bleChunkSize 傳輸...
-      return true; // 簡化展示
+      if (!connMode) {
+         alert('請先切換至「🖨️ 連線機台」分頁連接印表機！');
+         switchTab(3, '機台高速連線');
+         return false;
+      }
+
+      const progressEl = document.getElementById('txProgressText');
+      try {
+        if (connMode === 'usb' && usbDevice) {
+          await usbDevice.transferOut(usbEndpointOut, packetBuffer);
+          progressEl.innerText = '100% 完成';
+          return true;
+        }
+
+        if (connMode === 'ble' && printerCharacteristic) {
+          const total = packetBuffer.length;
+          for (let i = 0; i < total; i += bleChunkSize) {
+            const chunk = packetBuffer.slice(i, i + bleChunkSize);
+            
+            // 安全寫入判斷
+            if (printerCharacteristic.properties.write) {
+              if (printerCharacteristic.writeValueWithResponse) {
+                await printerCharacteristic.writeValueWithResponse(chunk);
+              } else {
+                await printerCharacteristic.writeValue(chunk);
+              }
+            } else {
+              await printerCharacteristic.writeValueWithoutResponse(chunk);
+              await new Promise(r => setTimeout(r, 5));
+            }
+            
+            if (i % (bleChunkSize * 8) === 0) {
+              progressEl.innerText = `傳輸中 ${Math.round((i / total) * 100)}%`;
+            }
+          }
+          progressEl.innerText = '100% 完成';
+          return true;
+        }
+      } catch (e) {
+        progressEl.innerText = '傳輸錯誤';
+        log(`傳輸失敗: ${e.message}`, 'error');
+        alert(`列印傳輸中斷: ${e.message}`);
+        return false;
+      }
     }
 
     async function testPrintCurrentCanvas(canvasId, titleName) {
       renderAllPreviews();
       const packet = compileCanvasToSingleGSv0Packet(document.getElementById(canvasId));
-      log(`測試列印【${titleName}】...`);
-      await sendPacketFast(packet);
+      log(`測試列印【${titleName}】(${packet.length} bytes)...`);
+      if(await sendPacketFast(packet)) {
+         log(`✅【${titleName}】測試列印成功！`, 'success');
+      }
     }
 
     // Modal 與出貨單邏輯
@@ -942,7 +1076,10 @@
       updateModalReceiptPreview();
       document.getElementById('receiptModal').classList.remove('hidden');
     }
-    function closeReceiptModal() { document.getElementById('receiptModal').classList.add('hidden'); }
+    
+    function closeReceiptModal() { 
+       document.getElementById('receiptModal').classList.add('hidden'); 
+    }
 
     function updateModalReceiptPreview() {
       const type = document.querySelector('input[name="receiptType"]:checked').value;
@@ -956,8 +1093,11 @@
       const toPrint = orderQueue.filter(o => o.loc === currentReceiptLoc && o.selected);
       const modalCanvas = document.getElementById('modalReceiptCanvas');
       
-      if (type === 'preorder') renderStationReceiptToCanvas(modalCanvas, currentReceiptLoc, fullDateStr, toPrint);
-      else renderTemporaryReceiptToCanvas(modalCanvas, currentReceiptLoc, fullDateStr, getGlobalPrintStyle().tempRowH);
+      if (type === 'preorder') {
+         renderStationReceiptToCanvas(modalCanvas, currentReceiptLoc, fullDateStr, toPrint);
+      } else {
+         renderTemporaryReceiptToCanvas(modalCanvas, currentReceiptLoc, fullDateStr, getGlobalPrintStyle().tempRowH);
+      }
     }
 
     async function printStationReceiptRaster() {
@@ -965,8 +1105,14 @@
       try {
         updateModalReceiptPreview();
         const packet = compileCanvasToSingleGSv0Packet(document.getElementById('modalReceiptCanvas'));
-        if (await sendPacketFast(packet)) closeReceiptModal();
-      } finally { document.getElementById('btnConfirmPrintReceipt').disabled = false; }
+        log(`列印出貨單：${currentReceiptLoc} (${packet.length} bytes)...`);
+        if (await sendPacketFast(packet)) {
+           log(`✅【${currentReceiptLoc}】出貨單列印完成！`, 'success');
+           closeReceiptModal();
+        }
+      } finally { 
+        document.getElementById('btnConfirmPrintReceipt').disabled = false; 
+      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
